@@ -1,4 +1,4 @@
-const CACHE = 'novaprint-v2';
+const CACHE = 'novaprint-v3';
 const ASSETS = [
   './',
   './index.html',
