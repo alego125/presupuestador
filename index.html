@@ -713,12 +713,7 @@ input[type=date]::-webkit-calendar-picker-indicator { filter: invert(1) opacity(
         <option value="USD">USD – Dólares</option>
         <option value="EUR">EUR – Euros</option>
       </select>
-      <span class="label-sm" style="margin-left:8px">IVA</span>
-      <select id="iva-rate" onchange="recalcular()">
-        <option value="0">Sin IVA</option>
-        <option value="10.5">10,5%</option>
-        <option value="21" selected>21%</option>
-      </select>
+
     </div>
 
     <div class="items-head">
@@ -732,8 +727,6 @@ input[type=date]::-webkit-calendar-picker-indicator { filter: invert(1) opacity(
     <button class="btn-add-item" onclick="addItem()">＋ Agregar ítem</button>
 
     <div class="totals">
-      <div class="total-row"><span class="lbl">Subtotal</span><span class="val" id="t-sub">$ 0,00</span></div>
-      <div class="total-row" id="row-iva"><span class="lbl" id="lbl-iva">IVA 21%</span><span class="val" id="t-iva">$ 0,00</span></div>
       <div class="total-row grand"><span class="lbl">TOTAL</span><span class="val" id="t-total">$ 0,00</span></div>
     </div>
   </div>
@@ -756,8 +749,8 @@ input[type=date]::-webkit-calendar-picker-indicator { filter: invert(1) opacity(
         <span class="print-value" id="pv-pago-metodo"></span>
       </div>
       <div class="field" id="f-pago-anticipo">
-        <label>Anticipo</label>
-        <input type="text" id="pago-anticipo" placeholder="Ej: 50%" oninput="checkEmpty()">
+        <label>Anticipo (%)</label>
+        <input type="number" id="pago-anticipo" placeholder="50" min="0" max="100" oninput="checkEmpty()">
         <span class="print-value" id="pv-pago-anticipo"></span>
       </div>
       <div class="field field-full" id="f-pago-entrega">
@@ -872,14 +865,14 @@ function renderItems() {
     const row = document.createElement('div');
     row.className = 'item-row';
     row.innerHTML = `
-      <input class="item-desc" id="item-desc-${it.id}" type="text" placeholder="Descripción" value="${it.desc.replace(/"/g,'&quot;')}" oninput="updateItem(${it.id},'desc',this.value)">
-      <input class="item-qty" type="number" min="0" step="any" placeholder="1" value="${it.qty||''}" oninput="updateItem(${it.id},'qty',this.value)">
-      <input class="item-price" type="number" min="0" step="any" placeholder="0.00" value="${it.price||''}" oninput="updateItem(${it.id},'price',this.value)">
-      <span class="item-sub" id="sub-${it.id}">${fmt(it.qty*it.price)}</span>
-      <span class="print-val-desc" style="display:none">${it.desc}</span>
-      <span class="print-val-qty" style="display:none">${it.qty}</span>
-      <span class="print-val-price" style="display:none">${fmt(it.price)}</span>
-      <button class="btn-del" onclick="removeItem(${it.id})">✕</button>`;
+      <input class="item-desc" id="item-desc-${it.id}" type="text" placeholder="Descripción" value="${it.desc.replace(/"/g,'&quot;')}" oninput="updateItem(${it.id},'desc',this.value)" style="grid-column:1">
+      <input class="item-qty" type="number" min="0" step="any" placeholder="1" value="${it.qty||''}" oninput="updateItem(${it.id},'qty',this.value)" style="grid-column:2">
+      <input class="item-price" type="number" min="0" step="any" placeholder="0.00" value="${it.price||''}" oninput="updateItem(${it.id},'price',this.value)" style="grid-column:3">
+      <span class="item-sub" id="sub-${it.id}" style="grid-column:4">${fmt(it.qty*it.price)}</span>
+      <span class="print-val-desc" style="display:none;grid-column:1">${it.desc}</span>
+      <span class="print-val-qty" style="display:none;grid-column:2">${it.qty}</span>
+      <span class="print-val-price" style="display:none;grid-column:3">${fmt(it.price)}</span>
+      <button class="btn-del" onclick="removeItem(${it.id})" style="grid-column:5">✕</button>`;
     c.appendChild(row);
   });
   recalcular();
@@ -892,14 +885,7 @@ function recalcular() {
     const el = document.getElementById('sub-' + it.id);
     if (el) el.textContent = fmt(s);
   });
-  const rate = parseFloat(document.getElementById('iva-rate').value) / 100;
-  const iva = sub * rate;
-  const lbl = rate === 0 ? 'Sin IVA' : `IVA ${document.getElementById('iva-rate').value}%`;
-  document.getElementById('lbl-iva').textContent = lbl;
-  document.getElementById('row-iva').style.display = rate === 0 ? 'none' : 'flex';
-  document.getElementById('t-sub').textContent = fmt(sub);
-  document.getElementById('t-iva').textContent = fmt(iva);
-  document.getElementById('t-total').textContent = fmt(sub + iva);
+  document.getElementById('t-total').textContent = fmt(sub);
 }
 
 /* ─── SYNC PRINT ─── */
@@ -932,7 +918,7 @@ const printableFields = [
   { input:'em-cargo',      field:'f-em-cargo',      span:'pv-em-cargo'      },
   { input:'em-dir',        field:'f-em-dir',        span:'pv-em-dir'        },
   { input:'em-email',      field:'f-em-email',      span:'pv-em-email'      },
-  { input:'pago-anticipo', field:'f-pago-anticipo', span:'pv-pago-anticipo' },
+  { input:'pago-anticipo', field:'f-pago-anticipo', span:'pv-pago-anticipo', suffix:'%' },
   { input:'pago-entrega',  field:'f-pago-entrega',  span:'pv-pago-entrega'  },
 ];
 const selectFields = [
@@ -941,9 +927,9 @@ const selectFields = [
 
 function imprimirPDF() {
   // Update print spans for text inputs
-  printableFields.forEach(({ input, field, span }) => {
+  printableFields.forEach(({ input, field, span, suffix }) => {
     const val = document.getElementById(input).value.trim();
-    document.getElementById(span).textContent = val;
+    document.getElementById(span).textContent = val ? val + (suffix || '') : '';
     document.getElementById(field).classList.toggle('field-empty', !val);
   });
   // Update print spans for selects
@@ -1104,7 +1090,6 @@ document.getElementById('fecha').valueAsDate = new Date();
 addItem();
 addItem();
 syncPrint();
-document.getElementById('iva-rate').addEventListener('change', recalcular);
 </script>
 </body>
 </html>
