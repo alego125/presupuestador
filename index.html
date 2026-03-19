@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0a6de4">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="NovaPrint 3D">
+<title>NovaPrint 3D – Presupuestos</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="assets/icons/icon-192x192.png">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   VARIABLES & RESET
+═══════════════════════════════════════════ */
+:root {
+  --bg:        #07111f;
+  --bg2:       #0c1d35;
+  --blue:      #0a6de4;
+  --blue-lit:  #2e8fff;
+  --cyan:      #00c8ef;
+  --navy:      #0d2a52;
+  --white:     #eef4ff;
+  --muted:     #7a9abf;
+  --border:    rgba(74,144,226,.18);
+  --glass:     rgba(255,255,255,.035);
+  --red:       #ff4d6d;
+  --green:     #00c48c;
+  --radius:    14px;
+  --radius-sm: 9px;
+  --shadow:    0 8px 32px rgba(0,0,0,.45);
+  --font:      'Outfit', sans-serif;
+  --mono:      'DM Mono', monospace;
+  --safe-top:  env(safe-area-inset-top, 0px);
+  --safe-bot:  env(safe-area-inset-bottom, 0px);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--white);
+  min-height: 100dvh;
+  overscroll-behavior-y: none;
+}
+
+/* ═══════════════════════════════════════════
+   TOPBAR
+═══════════════════════════════════════════ */
+.topbar {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(7,17,31,.92);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-bottom: 1px solid var(--border);
+  padding: calc(12px + var(--safe-top)) 16px 12px;
+  display: flex; align-items: center; gap: 12px;
+}
+.topbar-logo { height: 40px; width: auto; object-fit: contain; flex-shrink: 0; }
+.topbar-logo-fallback {
+  height: 40px; width: 40px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--blue), var(--cyan));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem; font-weight: 800; color: #fff; flex-shrink: 0;
+  display: none;
+}
+.topbar-text { flex: 1; min-width: 0; }
+.topbar-text h1 { font-size: clamp(0.9rem, 3.5vw, 1.1rem); font-weight: 700; letter-spacing: .01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.topbar-text span { font-size: 0.65rem; color: var(--cyan); letter-spacing: .08em; text-transform: uppercase; display: block; margin-top: 1px; }
+.topbar-actions { display: flex; gap: 8px; flex-shrink: 0; }
+.icon-btn {
+  width: 38px; height: 38px; border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--glass);
+  color: var(--muted); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; transition: all .2s;
+}
+.icon-btn:hover, .icon-btn:active { background: rgba(255,255,255,.08); color: var(--white); }
+
+/* ═══════════════════════════════════════════
+   MAIN SCROLL CONTAINER
+═══════════════════════════════════════════ */
+.main {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 16px 12px calc(100px + var(--safe-bot));
+}
+
+/* ═══════════════════════════════════════════
+   CARDS
+═══════════════════════════════════════════ */
+.card {
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 16px;
+  margin-bottom: 14px;
+  transition: border-color .2s;
+}
+.card:focus-within { border-color: rgba(74,144,226,.45); }
+
+.section-label {
+  font-size: 0.62rem; font-weight: 700;
+  letter-spacing: .14em; text-transform: uppercase;
+  color: var(--cyan); margin-bottom: 14px;
+  display: flex; align-items: center; gap: 8px;
+}
+.section-label::before {
+  content: ''; display: block;
+  width: 14px; height: 2px;
+  background: var(--cyan); border-radius: 2px; flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════════
+   FORM FIELDS
+═══════════════════════════════════════════ */
+.fields-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.fields-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+.field-full { grid-column: 1 / -1; }
+
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field label {
+  font-size: 0.65rem; font-weight: 600;
+  color: var(--muted); letter-spacing: .07em; text-transform: uppercase;
+}
+.field input, .field select, .field textarea {
+  background: rgba(10,25,50,.7);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--white);
+  font-family: var(--font); font-size: 0.88rem;
+  padding: 10px 12px;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+  width: 100%;
+  -webkit-appearance: none;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  border-color: var(--blue-lit);
+  box-shadow: 0 0 0 3px rgba(46,143,255,.15);
+}
+.field input::placeholder, .field textarea::placeholder { color: rgba(122,154,191,.5); }
+.field textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+.field select option { background: #0d2a52; color: var(--white); }
+input[type=number] { -moz-appearance: textfield; }
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+input[type=date]::-webkit-calendar-picker-indicator { filter: invert(1) opacity(.4); }
+.field .print-value { display: none; }
+
+/* ═══════════════════════════════════════════
+   DIVIDER ROW (currency)
+═══════════════════════════════════════════ */
+.row-inline { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+.row-inline .label-sm { font-size: 0.65rem; font-weight: 600; color: var(--muted); letter-spacing: .07em; text-transform: uppercase; white-space: nowrap; }
+.row-inline select {
+  background: rgba(10,25,50,.7); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); color: var(--white);
+  font-family: var(--font); font-size: 0.85rem; padding: 7px 10px;
+  outline: none; -webkit-appearance: none;
+}
+
+/* ═══════════════════════════════════════════
+   ITEMS TABLE
+═══════════════════════════════════════════ */
+.items-head {
+  display: grid;
+  grid-template-columns: 1fr 56px 100px 90px 36px;
+  gap: 6px; padding: 0 2px 8px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 8px;
+}
+.items-head span {
+  font-size: 0.6rem; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--muted);
+}
+.item-row {
+  display: grid;
+  grid-template-columns: 1fr 56px 100px 90px 36px;
+  gap: 6px; margin-bottom: 6px; align-items: center;
+}
+.item-row input {
+  background: rgba(10,25,50,.7); border: 1px solid var(--border);
+  border-radius: 7px; color: var(--white);
+  font-family: var(--font); font-size: 0.83rem; padding: 8px 9px;
+  width: 100%; outline: none; transition: border-color .2s;
+  -webkit-appearance: none;
+}
+.item-row input:focus { border-color: var(--blue-lit); }
+.item-sub {
+  font-family: var(--mono); font-size: 0.8rem;
+  color: var(--cyan); text-align: right; padding-right: 2px;
+  white-space: nowrap;
+}
+.btn-del {
+  width: 32px; height: 32px; border-radius: 7px;
+  border: 1px solid rgba(255,77,109,.25);
+  background: rgba(255,77,109,.08);
+  color: var(--red); cursor: pointer; font-size: .9rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .2s; flex-shrink: 0;
+}
+.btn-del:active { background: rgba(255,77,109,.25); }
+
+/* Mobile items: stack differently */
+@media (max-width: 480px) {
+  .items-head { display: none; }
+  .item-row {
+    grid-template-columns: 1fr 36px;
+    grid-template-rows: auto auto;
+    gap: 5px;
+    background: rgba(10,25,50,.5);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px;
+    margin-bottom: 8px;
+  }
+  .item-row .item-desc { grid-column: 1; grid-row: 1; }
+  .item-row .item-qty  { grid-column: 1; grid-row: 2; }
+  .item-row .item-price{ grid-column: 1; grid-row: 2; display: none; }
+  .item-row .item-sub  { grid-column: 1; grid-row: 2; text-align: left; font-size: 0.78rem; }
+  .item-row .btn-del   { grid-column: 2; grid-row: 1 / 3; align-self: center; }
+  /* Re-layout on mobile: 3 inputs + subtotal in row 2 */
+  .item-row {
+    grid-template-columns: 1fr 1fr 1fr 36px;
+    grid-template-rows: auto auto;
+  }
+  .item-row .item-desc  { grid-column: 1 / 4; grid-row: 1; }
+  .item-row .item-qty   { grid-column: 1; grid-row: 2; }
+  .item-row .item-price { grid-column: 2; grid-row: 2; display: block; }
+  .item-row .item-sub   { grid-column: 3; grid-row: 2; text-align: right; }
+  .item-row .btn-del    { grid-column: 4; grid-row: 1 / 3; }
+}
+
+.btn-add-item {
+  width: 100%; margin-top: 10px;
+  background: rgba(46,143,255,.08);
+  border: 1px dashed rgba(46,143,255,.35);
+  border-radius: 10px; color: var(--blue-lit);
+  font-family: var(--font); font-size: 0.85rem; font-weight: 500;
+  padding: 11px; cursor: pointer; transition: background .2s;
+  letter-spacing: .03em;
+}
+.btn-add-item:active { background: rgba(46,143,255,.18); }
+
+/* ═══════════════════════════════════════════
+   TOTALS
+═══════════════════════════════════════════ */
+.totals {
+  margin-top: 16px; border-top: 1px solid var(--border); padding-top: 14px;
+  display: flex; flex-direction: column; align-items: flex-end; gap: 7px;
+}
+.total-row { display: flex; gap: 16px; align-items: baseline; }
+.total-row .lbl {
+  font-size: 0.7rem; font-weight: 600; letter-spacing: .07em;
+  text-transform: uppercase; color: var(--muted); min-width: 90px; text-align: right;
+}
+.total-row .val {
+  font-family: var(--mono); font-size: 0.9rem;
+  color: var(--white); min-width: 120px; text-align: right;
+}
+.total-row.grand .lbl { color: var(--cyan); }
+.total-row.grand .val { font-size: 1.2rem; font-weight: 700; color: var(--cyan); }
+
+/* ═══════════════════════════════════════════
+   BOTTOM ACTION BAR
+═══════════════════════════════════════════ */
+.bottom-bar {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(7,17,31,.96);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-top: 1px solid var(--border);
+  padding: 10px 12px calc(10px + var(--safe-bot));
+  display: flex; gap: 10px;
+}
+.btn-main {
+  flex: 1; padding: 13px 10px;
+  border: none; border-radius: 12px;
+  font-family: var(--font); font-size: 0.88rem; font-weight: 600;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 7px;
+  transition: opacity .2s, transform .1s; letter-spacing: .03em;
+}
+.btn-main:active { opacity: .85; transform: scale(.97); }
+.btn-print {
+  background: linear-gradient(135deg, var(--blue), var(--blue-lit));
+  color: #fff; box-shadow: 0 4px 18px rgba(10,109,228,.35);
+}
+.btn-reset {
+  background: rgba(255,255,255,.06);
+  border: 1px solid var(--border);
+  color: var(--muted); flex: 0 0 auto; padding: 13px 16px;
+}
+
+/* ═══════════════════════════════════════════
+   INSTALL BANNER
+═══════════════════════════════════════════ */
+#install-banner {
+  display: none;
+  background: linear-gradient(135deg, var(--navy), #0a2040);
+  border: 1px solid rgba(46,143,255,.3);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  gap: 12px; align-items: center;
+}
+#install-banner.show { display: flex; }
+#install-banner p { flex: 1; font-size: 0.83rem; line-height: 1.4; color: var(--white); }
+#install-banner p span { color: var(--cyan); font-weight: 600; }
+.btn-install {
+  background: var(--blue); color: #fff;
+  border: none; border-radius: 9px;
+  font-family: var(--font); font-size: 0.8rem; font-weight: 600;
+  padding: 9px 14px; cursor: pointer; white-space: nowrap; flex-shrink: 0;
+}
+.btn-install-dismiss {
+  background: none; border: none; color: var(--muted);
+  cursor: pointer; font-size: 1.1rem; padding: 4px; flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════ */
+.toast {
+  position: fixed; bottom: calc(80px + var(--safe-bot)); left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: #1a3a5c; border: 1px solid rgba(46,143,255,.4);
+  border-radius: 40px; padding: 10px 20px;
+  font-size: 0.82rem; color: var(--white);
+  opacity: 0; pointer-events: none;
+  transition: opacity .3s, transform .3s;
+  white-space: nowrap; z-index: 200;
+  box-shadow: 0 4px 20px rgba(0,0,0,.5);
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ═══════════════════════════════════════════
+   PRINT STYLES
+═══════════════════════════════════════════ */
+@media print {
+  @page { size: A4; margin: 13mm 15mm; }
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  body { background: #fff !important; color: #0d1e35 !important; }
+  .topbar, .bottom-bar, .btn-del, .btn-add-item, .row-inline,
+  #install-banner, .toast { display: none !important; }
+  .main { max-width: 100%; padding: 0; margin: 0; }
+  .card { background: transparent !important; border: none !important; border-radius: 0 !important; padding: 0 !important; margin-bottom: 8px; }
+
+  /* Print header */
+  #print-header {
+    display: flex !important; align-items: center;
+    justify-content: space-between;
+    border-bottom: 2px solid #0a6de4;
+    padding-bottom: 12px; margin-bottom: 18px;
+  }
+  #print-header img { height: 58px; }
+  #ph-right { text-align: right; }
+  #ph-right h2 { font-size: 1.3rem; font-weight: 800; color: #0d1e35; }
+  #ph-right .ph-sub { font-size: 0.75rem; color: #5a7090; margin-top: 2px; }
+  #ph-right .ph-num { font-family: var(--mono); font-size: 0.82rem; color: #0a6de4; font-weight: 600; }
+
+  .section-label { color: #0a6de4 !important; border-bottom: 1px solid #d0ddf0; padding-bottom: 5px; margin-bottom: 10px; }
+  .section-label::before { background: #0a6de4 !important; }
+
+  /* Fields */
+  .fields-grid { gap: 8px; }
+  .field input, .field select, .field textarea { display: none !important; }
+  .field .print-value {
+    display: block !important;
+    font-size: 0.85rem; color: #0d1e35;
+    border-bottom: 1px solid #dde7f0; padding: 3px 0; min-height: 1.3em;
+  }
+  .field label { color: #5a7090 !important; font-size: 0.6rem; }
+  .field.field-empty { display: none !important; }
+  .print-hide { display: none !important; }
+
+  /* Items */
+  .items-head { display: grid !important; }
+  .items-head span { color: #5a7090 !important; }
+  .item-row { grid-template-columns: 1fr 56px 100px 90px !important; }
+  .item-row input { display: none !important; }
+  .item-row .print-val-desc,
+  .item-row .print-val-qty,
+  .item-row .print-val-price { display: block !important; font-size: 0.83rem; color: #0d1e35; border-bottom: 1px solid #eaf0f8; padding: 4px 0; }
+  .item-sub { color: #0a6de4 !important; font-size: 0.82rem; }
+
+  /* Totals */
+  .totals { border-top-color: #d0ddf0 !important; }
+  .total-row .lbl { color: #5a7090 !important; }
+  .total-row .val { color: #0d1e35 !important; }
+  .total-row.grand .lbl { color: #0a6de4 !important; }
+  .total-row.grand .val { color: #0a6de4 !important; }
+
+  /* Print footer */
+  #print-footer {
+    display: flex !important; justify-content: space-between; align-items: flex-end;
+    border-top: 1px solid #d0ddf0; padding-top: 12px; margin-top: 16px;
+  }
+  #print-footer p { font-size: 0.72rem; color: #5a7090; line-height: 1.6; }
+  #print-footer .pf-contact strong { color: #0a6de4; }
+  #pf-validez strong { color: #0d1e35; }
+}
+
+#print-header, #print-footer { display: none; }
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE BREAKPOINTS
+═══════════════════════════════════════════ */
+@media (max-width: 600px) {
+  .fields-grid.cols-3 { grid-template-columns: 1fr 1fr; }
+  .fields-grid { grid-template-columns: 1fr; }
+  .fields-grid .field-half { grid-column: auto; }
+}
+/* ═══════════════════════════════════════════
+   LOGO WRAP + EDIT BUTTON
+═══════════════════════════════════════════ */
+.topbar-logo-wrap {
+  position: relative;
+  display: flex; align-items: center;
+  flex-shrink: 0;
+}
+.logo-edit-btn {
+  position: absolute;
+  bottom: -5px; right: -6px;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: var(--blue);
+  border: 2px solid var(--bg);
+  color: #fff; cursor: pointer;
+  font-size: 0.6rem; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,.5);
+  transition: background .2s, transform .15s;
+  z-index: 10;
+}
+.logo-edit-btn:hover { background: var(--blue-lit); transform: scale(1.12); }
+.logo-edit-btn:active { transform: scale(.95); }
+
+/* ═══════════════════════════════════════════
+   LOGO MODAL
+═══════════════════════════════════════════ */
+.logo-modal-overlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 500;
+  background: rgba(4, 10, 20, .75);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  align-items: center; justify-content: center;
+  padding: 16px;
+  animation: fadeIn .2s ease;
+}
+.logo-modal-overlay.open { display: flex; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.logo-modal {
+  background: #0c1d35;
+  border: 1px solid rgba(74,144,226,.28);
+  border-radius: 20px;
+  width: 100%; max-width: 400px;
+  box-shadow: 0 24px 60px rgba(0,0,0,.6);
+  animation: slideUp .25s cubic-bezier(.22,1,.36,1);
+  overflow: hidden;
+}
+@keyframes slideUp {
+  from { transform: translateY(30px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.logo-modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.logo-modal-title {
+  font-size: 0.95rem; font-weight: 700; letter-spacing: .02em;
+}
+.logo-modal-close {
+  width: 30px; height: 30px; border-radius: 8px;
+  background: var(--glass); border: 1px solid var(--border);
+  color: var(--muted); cursor: pointer; font-size: .85rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .2s, color .2s;
+}
+.logo-modal-close:hover { background: rgba(255,255,255,.1); color: var(--white); }
+
+.logo-modal-body { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+
+.logo-drop-zone {
+  border: 2px dashed rgba(74,144,226,.35);
+  border-radius: var(--radius);
+  padding: 28px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color .2s, background .2s;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+}
+.logo-drop-zone:hover,
+.logo-drop-zone.drag-over {
+  border-color: var(--blue-lit);
+  background: rgba(46,143,255,.07);
+}
+.logo-drop-icon { font-size: 2.2rem; line-height: 1; }
+.logo-drop-text {
+  font-size: 0.85rem; color: var(--muted); line-height: 1.5;
+}
+.logo-drop-text span { color: var(--blue-lit); font-weight: 600; }
+
+.logo-preview-wrap {
+  display: none;
+  background: rgba(255,255,255,.06);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  text-align: center;
+}
+.logo-preview-wrap.visible { display: block; }
+.logo-preview-wrap img {
+  max-height: 80px; max-width: 100%;
+  object-fit: contain; border-radius: 6px;
+}
+
+.logo-modal-hint {
+  font-size: 0.7rem; color: var(--muted); text-align: center; line-height: 1.5;
+}
+
+.logo-modal-footer {
+  display: flex; gap: 10px;
+  padding: 14px 20px 18px;
+  border-top: 1px solid var(--border);
+}
+.logo-btn-primary {
+  flex: 1; padding: 11px;
+  background: linear-gradient(135deg, var(--blue), var(--blue-lit));
+  border: none; border-radius: 10px;
+  color: #fff; font-family: var(--font); font-size: 0.88rem; font-weight: 600;
+  cursor: pointer; transition: opacity .2s;
+}
+.logo-btn-primary:disabled { opacity: .4; cursor: not-allowed; }
+.logo-btn-primary:not(:disabled):hover { opacity: .88; }
+.logo-btn-secondary {
+  padding: 11px 14px;
+  background: var(--glass); border: 1px solid var(--border);
+  border-radius: 10px; color: var(--muted);
+  font-family: var(--font); font-size: 0.83rem; cursor: pointer;
+  transition: background .2s, color .2s; white-space: nowrap;
+}
+.logo-btn-secondary:hover { background: rgba(255,255,255,.08); color: var(--white); }
+
+@media print {
+  .logo-modal-overlay, .logo-edit-btn { display: none !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- MODAL CAMBIO DE LOGO -->
+<div id="logo-modal" class="logo-modal-overlay" role="dialog" aria-modal="true" aria-label="Cambiar logo">
+  <div class="logo-modal">
+    <div class="logo-modal-header">
+      <span class="logo-modal-title">Cambiar logo</span>
+      <button class="logo-modal-close" onclick="closeLogoModal()" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="logo-modal-body">
+      <div class="logo-drop-zone" id="logo-drop-zone">
+        <div class="logo-drop-icon">🖼️</div>
+        <p class="logo-drop-text">Arrastrá una imagen aquí<br><span>o tocá para seleccionar</span></p>
+        <input type="file" id="logo-file-input" accept="image/*" style="display:none">
+      </div>
+      <div class="logo-preview-wrap" id="logo-preview-wrap">
+        <img id="logo-preview-img" src="" alt="Preview">
+      </div>
+      <p class="logo-modal-hint">PNG, JPG o WEBP · Se guarda automáticamente en el dispositivo</p>
+    </div>
+    <div class="logo-modal-footer">
+      <button class="logo-btn-secondary" onclick="resetLogo()">Restaurar original</button>
+      <button class="logo-btn-primary" id="logo-btn-apply" onclick="applyLogo()" disabled>Aplicar</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="topbar-logo-wrap">
+    <img id="topbar-logo" class="topbar-logo" src="logo/logo.png" alt="Logo" onerror="this.style.display='none'; document.getElementById('topbar-fallback').style.display='flex';">
+    <div class="topbar-logo-fallback" id="topbar-fallback">N</div>
+    <button class="logo-edit-btn" onclick="openLogoModal()" title="Cambiar logo" aria-label="Cambiar logo">✏️</button>
+  </div>
+  <div class="topbar-text">
+    <h1>Generador de Presupuestos</h1>
+    <span>NovaPrint 3D</span>
+  </div>
+  <div class="topbar-actions">
+    <button class="icon-btn" onclick="imprimirPDF()" title="Imprimir / PDF">🖨️</button>
+    <button class="icon-btn" onclick="limpiar()" title="Nuevo presupuesto">🗑️</button>
+  </div>
+</header>
+
+<!-- PRINT HEADER -->
+<div id="print-header">
+  <img id="ph-logo" src="logo/logo.png" alt="Logo">
+  <div id="ph-right">
+    <h2>PRESUPUESTO</h2>
+    <p class="ph-sub" id="ph-fecha"></p>
+    <p class="ph-num" id="ph-num"></p>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- INSTALL BANNER -->
+  <div id="install-banner">
+    <p>📲 Instalá <span>NovaPrint 3D</span> en tu celular para usarla sin internet</p>
+    <button class="btn-install" id="btn-install-accept">Instalar</button>
+    <button class="btn-install-dismiss" id="btn-install-dismiss">✕</button>
+  </div>
+
+  <!-- DATOS DEL PRESUPUESTO -->
+  <div class="card">
+    <div class="section-label">Datos del Presupuesto</div>
+    <div class="fields-grid cols-3">
+      <div class="field">
+        <label>Nº Presupuesto</label>
+        <input type="text" id="num" placeholder="NP-2025-001" oninput="syncPrint()">
+        <span class="print-value" id="pv-num"></span>
+      </div>
+      <div class="field">
+        <label>Fecha de emisión</label>
+        <input type="date" id="fecha" oninput="syncPrint()">
+        <span class="print-value" id="pv-fecha"></span>
+      </div>
+      <div class="field">
+        <label>Validez</label>
+        <input type="text" id="validez" placeholder="30 días" oninput="syncPrint()">
+        <span class="print-value" id="pv-validez"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- DATOS DEL CLIENTE -->
+  <div class="card" id="card-cliente">
+    <div class="section-label">Datos del Cliente</div>
+    <div class="fields-grid">
+      <div class="field" id="f-cli-nombre">
+        <label>Nombre / Razón Social</label>
+        <input type="text" id="cli-nombre" placeholder="Nombre del cliente" oninput="checkEmpty()">
+        <span class="print-value" id="pv-cli-nombre"></span>
+      </div>
+      <div class="field" id="f-cli-doc">
+        <label>CUIT / DNI</label>
+        <input type="text" id="cli-doc" placeholder="Nº de documento" oninput="checkEmpty()">
+        <span class="print-value" id="pv-cli-doc"></span>
+      </div>
+      <div class="field field-full" id="f-cli-dir">
+        <label>Dirección</label>
+        <input type="text" id="cli-dir" placeholder="Dirección" oninput="checkEmpty()">
+        <span class="print-value" id="pv-cli-dir"></span>
+      </div>
+      <div class="field" id="f-cli-contact">
+        <label>Teléfono / Email</label>
+        <input type="text" id="cli-contact" placeholder="Teléfono o email" oninput="checkEmpty()">
+        <span class="print-value" id="pv-cli-contact"></span>
+      </div>
+      <div class="field" id="f-cli-ciudad">
+        <label>Ciudad / Provincia</label>
+        <input type="text" id="cli-ciudad" placeholder="Ciudad" oninput="checkEmpty()">
+        <span class="print-value" id="pv-cli-ciudad"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- DATOS DEL EMISOR -->
+  <div class="card" id="card-emisor">
+    <div class="section-label">Datos del Emisor</div>
+    <div class="fields-grid">
+      <div class="field" id="f-em-nombre">
+        <label>Nombre</label>
+        <input type="text" id="em-nombre" value="NovaPrint 3D" oninput="checkEmpty()">
+        <span class="print-value" id="pv-em-nombre">NovaPrint 3D</span>
+      </div>
+      <div class="field" id="f-em-cargo">
+        <label>Cargo / Área</label>
+        <input type="text" id="em-cargo" placeholder="Cargo" oninput="checkEmpty()">
+        <span class="print-value" id="pv-em-cargo"></span>
+      </div>
+      <div class="field" id="f-em-dir">
+        <label>Dirección</label>
+        <input type="text" id="em-dir" placeholder="Dirección" oninput="checkEmpty()">
+        <span class="print-value" id="pv-em-dir"></span>
+      </div>
+      <div class="field" id="f-em-email">
+        <label>Email</label>
+        <input type="email" id="em-email" placeholder="email@empresa.com" oninput="checkEmpty()">
+        <span class="print-value" id="pv-em-email"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ÍTEMS -->
+  <div class="card">
+    <div class="section-label">Ítems del Presupuesto</div>
+    <div class="row-inline">
+      <span class="label-sm">Moneda</span>
+      <select id="moneda" onchange="recalcular()">
+        <option value="ARS">$ ARS – Pesos</option>
+        <option value="USD">USD – Dólares</option>
+        <option value="EUR">EUR – Euros</option>
+      </select>
+      <span class="label-sm" style="margin-left:8px">IVA</span>
+      <select id="iva-rate" onchange="recalcular()">
+        <option value="0">Sin IVA</option>
+        <option value="10.5">10,5%</option>
+        <option value="21" selected>21%</option>
+      </select>
+    </div>
+
+    <div class="items-head">
+      <span>Descripción</span>
+      <span>Cant.</span>
+      <span>P. Unit.</span>
+      <span style="text-align:right">Subtotal</span>
+      <span></span>
+    </div>
+    <div id="items-container"></div>
+    <button class="btn-add-item" onclick="addItem()">＋ Agregar ítem</button>
+
+    <div class="totals">
+      <div class="total-row"><span class="lbl">Subtotal</span><span class="val" id="t-sub">$ 0,00</span></div>
+      <div class="total-row" id="row-iva"><span class="lbl" id="lbl-iva">IVA 21%</span><span class="val" id="t-iva">$ 0,00</span></div>
+      <div class="total-row grand"><span class="lbl">TOTAL</span><span class="val" id="t-total">$ 0,00</span></div>
+    </div>
+  </div>
+
+  <!-- CONDICIONES DE PAGO -->
+  <div class="card">
+    <div class="section-label">Condiciones de Pago</div>
+    <div class="fields-grid">
+      <div class="field" id="f-pago-metodo">
+        <label>Método de pago</label>
+        <select id="pago-metodo" onchange="checkEmpty()">
+          <option value="">— Seleccionar —</option>
+          <option value="Efectivo">Efectivo</option>
+          <option value="Transferencia bancaria">Transferencia bancaria</option>
+          <option value="Mercado Pago">Mercado Pago</option>
+          <option value="Tarjeta de crédito">Tarjeta de crédito</option>
+          <option value="Cheque">Cheque</option>
+          <option value="A convenir">A convenir</option>
+        </select>
+        <span class="print-value" id="pv-pago-metodo"></span>
+      </div>
+      <div class="field" id="f-pago-anticipo">
+        <label>Anticipo</label>
+        <input type="text" id="pago-anticipo" placeholder="Ej: 50%" oninput="checkEmpty()">
+        <span class="print-value" id="pv-pago-anticipo"></span>
+      </div>
+      <div class="field field-full" id="f-pago-entrega">
+        <label>Tiempo de entrega</label>
+        <input type="text" id="pago-entrega" placeholder="Ej: 7-10 días hábiles" oninput="checkEmpty()">
+        <span class="print-value" id="pv-pago-entrega"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- OBSERVACIONES -->
+  <div class="card" id="card-obs">
+    <div class="section-label">Observaciones / Condiciones</div>
+    <div class="field">
+      <textarea id="obs" placeholder="Notas adicionales, garantías, aclaraciones..." rows="4" oninput="checkEmpty()"></textarea>
+      <span class="print-value" id="pv-obs"></span>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- PRINT FOOTER -->
+<div id="print-footer">
+  <div>
+    <p><strong>NovaPrint 3D</strong> · Soluciones de Impresión 3D</p>
+    <p id="pf-validez"></p>
+  </div>
+  <div class="pf-contact">
+    <p>📞 <strong>299 623-0056</strong></p>
+    <p>📸 <strong>@novaprintddd</strong></p>
+  </div>
+</div>
+
+<!-- BOTTOM BAR -->
+<div class="bottom-bar">
+  <button class="btn-main btn-print" onclick="imprimirPDF()">🖨️ Imprimir / PDF</button>
+  <button class="btn-main btn-reset" onclick="limpiar()">🗑️ Limpiar</button>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ─── SERVICE WORKER ─── */
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
+}
+
+/* ─── PWA INSTALL ─── */
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('install-banner').classList.add('show');
+});
+document.getElementById('btn-install-accept').addEventListener('click', async () => {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  document.getElementById('install-banner').classList.remove('show');
+  if (outcome === 'accepted') toast('✅ App instalada correctamente');
+});
+document.getElementById('btn-install-dismiss').addEventListener('click', () => {
+  document.getElementById('install-banner').classList.remove('show');
+});
+
+/* ─── TOAST ─── */
+function toast(msg, ms = 2500) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), ms);
+}
+
+/* ─── ITEMS ─── */
+let items = [];
+let idCnt = 0;
+
+function sym() {
+  const m = document.getElementById('moneda').value;
+  return m === 'USD' ? 'US$' : m === 'EUR' ? '€' : '$';
+}
+function fmt(n) {
+  return sym() + '\u00a0' + Number(n).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function addItem() {
+  const id = ++idCnt;
+  items.push({ id, desc: '', qty: 1, price: 0 });
+  renderItems();
+  // focus last description
+  setTimeout(() => {
+    const el = document.querySelector(`#item-desc-${id}`);
+    if (el) el.focus();
+  }, 50);
+}
+function removeItem(id) {
+  items = items.filter(i => i.id !== id);
+  renderItems();
+}
+function updateItem(id, field, val) {
+  const it = items.find(i => i.id === id);
+  if (!it) return;
+  if (field === 'qty' || field === 'price') it[field] = parseFloat(val) || 0;
+  else it[field] = val;
+  recalcular();
+}
+function renderItems() {
+  const c = document.getElementById('items-container');
+  c.innerHTML = '';
+  items.forEach(it => {
+    const row = document.createElement('div');
+    row.className = 'item-row';
+    row.innerHTML = `
+      <input class="item-desc" id="item-desc-${it.id}" type="text" placeholder="Descripción" value="${it.desc.replace(/"/g,'&quot;')}" oninput="updateItem(${it.id},'desc',this.value)">
+      <input class="item-qty" type="number" min="0" step="any" placeholder="1" value="${it.qty||''}" oninput="updateItem(${it.id},'qty',this.value)">
+      <input class="item-price" type="number" min="0" step="any" placeholder="0.00" value="${it.price||''}" oninput="updateItem(${it.id},'price',this.value)">
+      <span class="item-sub" id="sub-${it.id}">${fmt(it.qty*it.price)}</span>
+      <span class="print-val-desc" style="display:none">${it.desc}</span>
+      <span class="print-val-qty" style="display:none">${it.qty}</span>
+      <span class="print-val-price" style="display:none">${fmt(it.price)}</span>
+      <button class="btn-del" onclick="removeItem(${it.id})">✕</button>`;
+    c.appendChild(row);
+  });
+  recalcular();
+}
+function recalcular() {
+  let sub = 0;
+  items.forEach(it => {
+    const s = it.qty * it.price;
+    sub += s;
+    const el = document.getElementById('sub-' + it.id);
+    if (el) el.textContent = fmt(s);
+  });
+  const rate = parseFloat(document.getElementById('iva-rate').value) / 100;
+  const iva = sub * rate;
+  const lbl = rate === 0 ? 'Sin IVA' : `IVA ${document.getElementById('iva-rate').value}%`;
+  document.getElementById('lbl-iva').textContent = lbl;
+  document.getElementById('row-iva').style.display = rate === 0 ? 'none' : 'flex';
+  document.getElementById('t-sub').textContent = fmt(sub);
+  document.getElementById('t-iva').textContent = fmt(iva);
+  document.getElementById('t-total').textContent = fmt(sub + iva);
+}
+
+/* ─── SYNC PRINT ─── */
+function syncPrint() {
+  const num = document.getElementById('num').value;
+  const fecha = document.getElementById('fecha').value;
+  const validez = document.getElementById('validez').value;
+  document.getElementById('ph-num').textContent = num ? 'Presupuesto N° ' + num : '';
+  const d = fecha ? new Date(fecha + 'T00:00:00') : null;
+  document.getElementById('ph-fecha').textContent = d
+    ? d.toLocaleDateString('es-AR', { day:'2-digit', month:'long', year:'numeric' }) : '';
+  document.getElementById('pf-validez').textContent = validez ? 'Validez: ' + validez : '';
+  document.getElementById('pv-num').textContent = num;
+  document.getElementById('pv-fecha').textContent = d
+    ? d.toLocaleDateString('es-AR', { day:'2-digit', month:'long', year:'numeric' }) : '';
+  document.getElementById('pv-validez').textContent = validez;
+}
+
+/* ─── CHECK EMPTY FIELDS ─── */
+function checkEmpty() { syncPrint(); }
+
+/* ─── PRINT PDF ─── */
+const printableFields = [
+  { input:'cli-nombre',    field:'f-cli-nombre',    span:'pv-cli-nombre'    },
+  { input:'cli-doc',       field:'f-cli-doc',       span:'pv-cli-doc'       },
+  { input:'cli-dir',       field:'f-cli-dir',       span:'pv-cli-dir'       },
+  { input:'cli-contact',   field:'f-cli-contact',   span:'pv-cli-contact'   },
+  { input:'cli-ciudad',    field:'f-cli-ciudad',    span:'pv-cli-ciudad'    },
+  { input:'em-nombre',     field:'f-em-nombre',     span:'pv-em-nombre'     },
+  { input:'em-cargo',      field:'f-em-cargo',      span:'pv-em-cargo'      },
+  { input:'em-dir',        field:'f-em-dir',        span:'pv-em-dir'        },
+  { input:'em-email',      field:'f-em-email',      span:'pv-em-email'      },
+  { input:'pago-anticipo', field:'f-pago-anticipo', span:'pv-pago-anticipo' },
+  { input:'pago-entrega',  field:'f-pago-entrega',  span:'pv-pago-entrega'  },
+];
+const selectFields = [
+  { input:'pago-metodo', field:'f-pago-metodo', span:'pv-pago-metodo' },
+];
+
+function imprimirPDF() {
+  // Update print spans for text inputs
+  printableFields.forEach(({ input, field, span }) => {
+    const val = document.getElementById(input).value.trim();
+    document.getElementById(span).textContent = val;
+    document.getElementById(field).classList.toggle('field-empty', !val);
+  });
+  // Update print spans for selects
+  selectFields.forEach(({ input, field, span }) => {
+    const el = document.getElementById(input);
+    const val = el.value.trim();
+    document.getElementById(span).textContent = val;
+    document.getElementById(field).classList.toggle('field-empty', !val);
+  });
+  // Obs
+  const obsVal = document.getElementById('obs').value.trim();
+  document.getElementById('pv-obs').textContent = obsVal;
+  document.getElementById('card-obs').classList.toggle('print-hide', !obsVal);
+
+  // Sección cliente
+  const cliEmpty = ['cli-nombre','cli-doc','cli-dir','cli-contact','cli-ciudad'].every(id => !document.getElementById(id).value.trim());
+  document.getElementById('card-cliente').classList.toggle('print-hide', cliEmpty);
+
+  // Sección emisor
+  const emEmpty = ['em-nombre','em-cargo','em-dir','em-email'].every(id => !document.getElementById(id).value.trim());
+  document.getElementById('card-emisor').classList.toggle('print-hide', emEmpty);
+
+  // Update item print values
+  items.forEach(it => {
+    const row = document.querySelector(`#item-desc-${it.id}`)?.closest('.item-row');
+    if (!row) return;
+    const desc  = row.querySelector('.print-val-desc');
+    const qty   = row.querySelector('.print-val-qty');
+    const price = row.querySelector('.print-val-price');
+    if (desc)  desc.textContent  = it.desc;
+    if (qty)   qty.textContent   = it.qty;
+    if (price) price.textContent = fmt(it.price);
+  });
+
+  window.print();
+
+  // Restore after print
+  setTimeout(() => {
+    printableFields.forEach(({ field }) => document.getElementById(field).classList.remove('field-empty'));
+    selectFields.forEach(({ field }) => document.getElementById(field).classList.remove('field-empty'));
+    ['card-obs','card-cliente','card-emisor'].forEach(id => document.getElementById(id).classList.remove('print-hide'));
+  }, 1500);
+}
+
+/* ─── LIMPIAR ─── */
+function limpiar() {
+  if (!confirm('¿Borrar todos los datos y comenzar un nuevo presupuesto?')) return;
+  ['num','fecha','validez','cli-nombre','cli-doc','cli-dir','cli-contact','cli-ciudad',
+   'em-cargo','em-dir','em-email','pago-anticipo','pago-entrega','obs'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('em-nombre').value = 'NovaPrint 3D';
+  document.getElementById('pago-metodo').value = '';
+  items = []; idCnt = 0;
+  renderItems();
+  syncPrint();
+  toast('🗑️ Presupuesto limpiado');
+}
+
+/* ─── LOGO MODAL ─── */
+const LOGO_KEY = 'np3d_logo_dataurl';
+let pendingLogoDataURL = null;
+
+function openLogoModal() {
+  pendingLogoDataURL = null;
+  document.getElementById('logo-btn-apply').disabled = true;
+  document.getElementById('logo-preview-wrap').classList.remove('visible');
+  document.getElementById('logo-preview-img').src = '';
+  document.getElementById('logo-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeLogoModal() {
+  document.getElementById('logo-modal').classList.remove('open');
+  document.body.style.overflow = '';
+  pendingLogoDataURL = null;
+}
+// Close on backdrop click
+document.getElementById('logo-modal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeLogoModal();
+});
+// Close on Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeLogoModal();
+});
+
+function handleLogoFile(file) {
+  if (!file || !file.type.startsWith('image/')) {
+    toast('⚠️ Solo se admiten imágenes (PNG, JPG, WEBP)');
+    return;
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    toast('⚠️ La imagen no puede superar 5 MB');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = e => {
+    pendingLogoDataURL = e.target.result;
+    document.getElementById('logo-preview-img').src = pendingLogoDataURL;
+    document.getElementById('logo-preview-wrap').classList.add('visible');
+    document.getElementById('logo-btn-apply').disabled = false;
+  };
+  reader.readAsDataURL(file);
+}
+
+// Click on drop zone → open file picker
+document.getElementById('logo-drop-zone').addEventListener('click', () => {
+  document.getElementById('logo-file-input').click();
+});
+document.getElementById('logo-file-input').addEventListener('change', e => {
+  handleLogoFile(e.target.files[0]);
+  e.target.value = ''; // reset so same file can be re-selected
+});
+
+// Drag & drop
+const dz = document.getElementById('logo-drop-zone');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+dz.addEventListener('drop', e => {
+  e.preventDefault();
+  dz.classList.remove('drag-over');
+  handleLogoFile(e.dataTransfer.files[0]);
+});
+
+function applyLogo() {
+  if (!pendingLogoDataURL) return;
+  setLogoSrc(pendingLogoDataURL);
+  try { localStorage.setItem(LOGO_KEY, pendingLogoDataURL); } catch(e) { /* storage full */ }
+  closeLogoModal();
+  toast('✅ Logo actualizado');
+}
+
+function resetLogo() {
+  localStorage.removeItem(LOGO_KEY);
+  setLogoSrc('logo/logo.png');
+  closeLogoModal();
+  toast('🔄 Logo restaurado al original');
+}
+
+function setLogoSrc(src) {
+  const tl = document.getElementById('topbar-logo');
+  const pl = document.getElementById('ph-logo');
+  const fb = document.getElementById('topbar-fallback');
+  tl.style.display = '';
+  fb.style.display = 'none';
+  tl.src = src;
+  pl.src = src;
+  tl.onerror = () => { tl.style.display = 'none'; fb.style.display = 'flex'; };
+}
+
+// On load: restore saved logo from localStorage
+(function loadSavedLogo() {
+  const saved = localStorage.getItem(LOGO_KEY);
+  if (saved) setLogoSrc(saved);
+})();
+
+/* ─── INIT ─── */
+document.getElementById('fecha').valueAsDate = new Date();
+addItem();
+addItem();
+syncPrint();
+document.getElementById('iva-rate').addEventListener('change', recalcular);
+</script>
+</body>
+</html>

@@ -1,0 +1,107 @@
+╔══════════════════════════════════════════════════════════════╗
+║        CÓMO SUBIR A GITHUB Y USAR GITHUB PAGES              ║
+║        NovaPrint 3D – Guía paso a paso                       ║
+╚══════════════════════════════════════════════════════════════╝
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  PASO 1 — Crear cuenta en GitHub (si no tenés)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  1. Andá a https://github.com
+  2. Clic en "Sign up"
+  3. Completá usuario, email y contraseña
+  4. Verificá el email
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  PASO 2 — Crear el repositorio
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  1. Estando logueado, clic en el "+" (arriba a la derecha)
+  2. Seleccioná "New repository"
+  3. Completá:
+       Repository name:  novaprint-app
+       Description:      Generador de presupuestos NovaPrint 3D
+       Visibility:       ● Public   ← IMPORTANTE: tiene que ser público
+                                        para GitHub Pages gratuito
+  4. NO marques ninguna opción extra (sin README, sin .gitignore)
+  5. Clic en "Create repository"
+  6. ✅ GitHub te muestra la página del repo vacío
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  PASO 3 — Subir los archivos
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  SIN necesidad de instalar Git — todo desde el navegador:
+
+  A) En la página del repo vacío, clic en
+     "uploading an existing file"
+
+  B) Arrastrá TODA la carpeta novaprint-app al área de subida
+     (o clic en "choose your files" y seleccioná todos)
+
+     ⚠️ IMPORTANTE: subí el CONTENIDO de la carpeta, no la
+     carpeta en sí. Es decir, tenés que ver estos archivos
+     en el repo raíz:
+       index.html
+       manifest.json
+       sw.js
+       README.md
+       .gitignore
+       logo/
+       assets/
+       .github/
+
+  C) Abajo en "Commit changes":
+       Commit message: "Primera versión de la app"
+  
+  D) Clic en "Commit changes"
+  E) ✅ Se suben todos los archivos
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  PASO 4 — Activar GitHub Pages
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  1. En el repo, clic en "Settings" (barra superior)
+  2. En el menú izquierdo, clic en "Pages"
+  3. En "Source" seleccioná → GitHub Actions
+  4. ✅ Listo, no hace falta hacer nada más
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  PASO 5 — Esperar el deploy automático
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  1. Andá a la pestaña "Actions" del repo
+  2. Vas a ver un workflow corriendo "Deploy to GitHub Pages"
+  3. Esperá ~1-2 minutos hasta que aparezca ✅ verde
+  4. Volvé a Settings → Pages
+  5. Vas a ver el link:
+     https://TU_USUARIO.github.io/novaprint-app/
+  6. ✅ ¡La app está online!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  CÓMO ACTUALIZAR LA APP EN EL FUTURO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Para cambiar cualquier archivo:
+  1. En el repo de GitHub, navegá al archivo
+  2. Clic en el ícono del lápiz ✏️ (arriba a la derecha)
+  3. Hacé los cambios
+  4. Clic en "Commit changes"
+  5. En ~1 minuto se actualiza automáticamente en la web
+
+  Para cambiar solo el logo (para todos los dispositivos):
+  1. Navegá a la carpeta logo/ en el repo
+  2. Clic en "Add file" → "Upload files"
+  3. Subí tu nuevo logo.png
+  4. Commit → listo en ~1 minuto
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  INSTALAR EN ANDROID DESDE GITHUB PAGES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  1. Abrí Chrome en tu celular Android
+  2. Entrá a https://TU_USUARIO.github.io/novaprint-app/
+  3. Tocá el banner "Instalar app" que aparece abajo
+     (o menú ⋮ → "Agregar a pantalla de inicio")
+  4. ✅ Queda como ícono en el escritorio
+  5. Funciona offline después de la primera carga
+
+╔══════════════════════════════════════════════════════════════╗
+║  Tu link final será:                                         ║
+║  https://TU_USUARIO.github.io/novaprint-app/                 ║
+║                                                              ║
+║  Reemplazá TU_USUARIO por tu usuario de GitHub               ║
+╚══════════════════════════════════════════════════════════════╝
