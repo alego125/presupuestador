@@ -174,37 +174,46 @@ input[type=date]::-webkit-calendar-picker-indicator { filter: invert(1) opacity(
 .items-head {
   display: grid;
   grid-template-columns: 1fr 56px 100px 90px 36px;
-  gap: 6px; padding: 0 2px 8px;
+  gap: 4px; padding: 0 2px 6px;
   border-bottom: 1px solid var(--border);
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 .items-head span {
-  font-size: 0.6rem; font-weight: 700;
+  font-size: 0.58rem; font-weight: 700;
   letter-spacing: .1em; text-transform: uppercase; color: var(--muted);
 }
+.items-head span:nth-child(2),
+.items-head span:nth-child(3) { text-align: center; }
+.items-head span:nth-child(4) { text-align: right; }
 .item-row {
   display: grid;
   grid-template-columns: 1fr 56px 100px 90px 36px;
-  gap: 6px; margin-bottom: 6px; align-items: center;
+  gap: 4px; margin-bottom: 4px; align-items: center;
 }
+/* Hidden print spans must NOT participate in grid layout */
+.item-row .print-val-desc,
+.item-row .print-val-qty,
+.item-row .print-val-price { display: none; position: absolute; }
 .item-row input {
   background: rgba(10,25,50,.7); border: 1px solid var(--border);
-  border-radius: 7px; color: var(--white);
-  font-family: var(--font); font-size: 0.83rem; padding: 8px 9px;
+  border-radius: 6px; color: var(--white);
+  font-family: var(--font); font-size: 0.82rem; padding: 6px 8px;
   width: 100%; outline: none; transition: border-color .2s;
   -webkit-appearance: none;
 }
 .item-row input:focus { border-color: var(--blue-lit); }
+.item-row .item-qty  { text-align: center; }
+.item-row .item-price { text-align: right; }
 .item-sub {
   font-family: var(--mono); font-size: 0.8rem;
   color: var(--cyan); text-align: right; padding-right: 2px;
   white-space: nowrap;
 }
 .btn-del {
-  width: 32px; height: 32px; border-radius: 7px;
+  width: 28px; height: 28px; border-radius: 6px;
   border: 1px solid rgba(255,77,109,.25);
   background: rgba(255,77,109,.08);
-  color: var(--red); cursor: pointer; font-size: .9rem;
+  color: var(--red); cursor: pointer; font-size: .8rem;
   display: flex; align-items: center; justify-content: center;
   transition: background .2s; flex-shrink: 0;
 }
@@ -385,12 +394,21 @@ input[type=date]::-webkit-calendar-picker-indicator { filter: invert(1) opacity(
   /* Items */
   .items-head { display: grid !important; }
   .items-head span { color: #5a7090 !important; }
-  .item-row { grid-template-columns: 1fr 56px 100px 90px !important; }
+  .item-row {
+    grid-template-columns: 1fr 56px 100px 90px !important;
+    gap: 4px !important; margin-bottom: 2px !important;
+  }
   .item-row input { display: none !important; }
   .item-row .print-val-desc,
   .item-row .print-val-qty,
-  .item-row .print-val-price { display: block !important; font-size: 0.83rem; color: #0d1e35; border-bottom: 1px solid #eaf0f8; padding: 4px 0; }
-  .item-sub { color: #0a6de4 !important; font-size: 0.82rem; }
+  .item-row .print-val-price {
+    display: block !important; position: static !important;
+    font-size: 0.82rem; color: #0d1e35;
+    border-bottom: 1px solid #eaf0f8; padding: 3px 0;
+  }
+  .item-row .print-val-qty   { text-align: center; }
+  .item-row .print-val-price { text-align: right; }
+  .item-sub { color: #0a6de4 !important; font-size: 0.82rem; text-align: right; }
 
   /* Totals */
   .totals { border-top-color: #d0ddf0 !important; }
